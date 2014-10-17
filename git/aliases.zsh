@@ -6,14 +6,80 @@ then
   alias git=$hub_path
 fi
 
-# The rest of my fun git aliases
-alias gl='git pull --prune'
-alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
-alias gp='git push origin HEAD'
-alias gd='git diff'
-alias gc='git commit'
-alias gca='git commit -a'
-alias gco='git checkout'
-alias gcb='git copy-branch-name'
-alias gb='git branch'
-alias gs='git status -sb' # upgrade your git if -sb breaks for you. it's fun.
+alias ga='git add -A .'
+alias gb=fnGitBranch
+alias gbm=fnGitBranchMaster
+alias go=fnGitCheckout
+alias gol=fnGitCheckoutPull
+alias gc=fnGitCommit
+alias gch=fnGitCommitPush
+alias gi='git diff'
+alias gf='git fetch  --all'
+alias gr='git reset --hard'
+alias gm=fnGitMerge
+alias gl='git pull'
+alias gh='git push'
+alias gs='git status -sb'
+alias gt='git stash'
+alias gta='git stash apply'
+
+fnGitBranch() {
+    if (( $# == 0 ))
+    then
+      git branch -a
+    else
+        git pull
+        git branch feature/$1
+        git checkout feature/$1
+        git push -u origin feature/$1
+    fi
+}
+
+fnGitBranchMaster() {
+    if (( $# == 0 ))
+    then
+      git branch -a
+    else
+        git checkout master
+        git pull
+        git branch feature/$1
+        git checkout feature/$1
+        git push -u origin feature/$1
+    fi
+}
+
+fnGitCheckout() {
+    if (( $# == 0 ))
+    then
+      git checkout master
+    else
+      git checkout feature/$1
+    fi
+}
+
+fnGitCheckoutPull() {
+      fnGitCheckout
+      git pull
+}
+
+fnGitCommit() {
+    git add --all
+    git commit -m "$1"
+}
+
+fnGitCommitPush() {
+    git add --all
+    git commit -m "$1"
+    git pull
+    git push
+}
+
+fnGitMerge() {
+    if (( $# == 0 ))
+    then
+      git pull
+      git merge master
+    else
+      git merge $1
+    fi
+}
