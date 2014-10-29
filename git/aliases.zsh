@@ -9,6 +9,7 @@ fi
 alias ga='git add -A .'
 alias gb=fnGitBranch
 alias gd=fnGitDelete
+alias gdf=fnGitDeleteFeature
 alias gbm=fnGitBranchMaster
 alias go=fnGitCheckout
 alias gol=fnGitCheckoutPull
@@ -45,6 +46,16 @@ fnGitDelete() {
         echo "\n    Usage: gd <branch-to-delete> ..."
     else
         git branch -D $*
+        fnGitBranch
+    fi
+}
+
+fnGitDeleteFeature() {
+    if (( $# == 0 ))
+    then
+        echo "\n    Usage: gd <branch-to-delete> ..."
+    else
+        git branch -D feature/$*
         fnGitBranch
     fi
 }
