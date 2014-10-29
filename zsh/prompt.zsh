@@ -92,7 +92,7 @@ venv_name() {
 }
 
 venv_prompt() {
-  echo "%{$fg_bold[green]%}[$(venv_name)︎︎]%{$reset_color%} "
+  echo "%{$fg_bold[green]%}[$(venv_name)]%{$reset_color%} "
 }
 
 #
