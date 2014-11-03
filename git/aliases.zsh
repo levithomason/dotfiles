@@ -112,7 +112,7 @@ fnGitMerge() {
 fnGitLog() {
     if (( $# == 0 ))
     then
-        git log --decorate --graph --oneline
+        git log --decorate --graph --oneline -n 10
     else
         git log --decorate --graph --oneline -n $1
     fi
@@ -121,7 +121,7 @@ fnGitLog() {
 fnGitLogVerbose() {
     if (( $# == 0 ))
     then
-        git log --decorate --graph
+        git log --decorate --graph -n 10
     else
         git log --decorate --graph -n $1
     fi
