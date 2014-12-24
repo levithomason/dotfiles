@@ -16,10 +16,10 @@ alias gol=fnGitCheckoutPull
 alias gc=fnGitCommit
 alias gch=fnGitCommitPush
 alias gi='git diff'
-alias gf='git fetch --all'
+alias gf='git fetch --all && gb'
 alias gr='git reset --hard'
 alias gm=fnGitMerge
-alias gn='git pull --prune && gb'
+alias gn=fnGitPrune
 alias gg=fnGitLog
 alias ggv=fnGitLogVerbose
 alias gl='git pull'
@@ -27,6 +27,51 @@ alias gh='git push'
 alias gs='git status -sb'
 alias gt='git stash'
 alias gta='git stash apply'
+
+fnGitPrune() {
+    # trim fetched to match remotes
+    git pull --prune
+
+    # save current branch
+    original_branch=$(git branch | grep "* ");
+    original_branch=${original_branch/"* "};
+
+    git checkout master
+
+    #                    +merged branches      -current       -specific
+    branches_to_delete=$(git branch --merged | grep -v "\*" | egrep -v "master")
+
+    # array from lines
+    branches_to_delete=("${(f)branches_to_delete}")
+
+    echo "\nLocal branches already merged:"
+    # list branches
+    for branch in $branches_to_delete; do
+        echo "$branch"
+    done
+    
+    echo ""
+    read -q "CONFIRM?Delete ALL these? (y/N) "
+    echo ""
+
+    if [[ $CONFIRM == "y" ]]
+        then
+            # delete branches
+            for branch in $branches_to_delete; do
+                git branch -d ${branch// /}
+            done
+            
+        else
+            echo "\nCancelled"
+    fi
+
+    git checkout $original_branch
+
+    gb
+    
+    unset branches_to_delete
+    unset original_branch
+}
 
 fnGitBranch() {
     if (( $# == 0 ))
