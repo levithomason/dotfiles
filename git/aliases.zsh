@@ -29,14 +29,14 @@ alias gt='git stash'
 alias gta='git stash apply'
 
 fnGitPrune() {
-    # trim fetched to match remotes
-    git pull --prune
-
     # save current branch
     original_branch=$(git branch | grep "* ");
     original_branch=${original_branch/"* "};
 
     git checkout master
+
+    # trim fetched to match remotes
+    git pull --prune
 
     #                    +merged branches      -current       -specific
     branches_to_delete=$(git branch --merged | grep -v "\*" | egrep -v "master")
