@@ -151,8 +151,19 @@ fnGitCommitPush() {
 fnGitMerge() {
     if (( $# == 0 ))
     then
+        # save current branch
+        original_branch=$(git branch | grep "* ");
+        original_branch=${original_branch/"* "};
+    
+        # update master
+        git checkout master
         git pull
+        
+        # merge into original branch
+        git checkout $original_branch
         git merge master
+
+        unset original_branch
     else
         git merge $1
     fi
