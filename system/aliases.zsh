@@ -12,10 +12,17 @@ fi
 
 alias odot="open ~/.dotfiles"
 alias "cd.."="cd .."
+alias ".."="cd .."
+alias ren=fnRename
 alias src=fnSrcProject
 
+# Project Change Directory - Changes directory to a folder in ~/src/*
+#
+# Matches project folders starting with arg
+# Changes to project if 1 match
+# Lists projects if > 1 match
+#
 fnSrcProject() {
-  
   src_counter=1
   src_projects=()
 
@@ -55,4 +62,27 @@ fnSrcProject() {
   unset src_basename
   unset src_choice
   unset src_project_name
+}
+
+# Bulk Rename - Renames all occurrences in the current directory
+#
+# Given:
+#   foo-thing.txt
+#   another-foo-item.js
+#   foo/
+#     last-foo.html
+#
+# Command:
+#   ren foo bar
+#
+# Results:
+#   bar-thing.txt
+#   another-bar-item.js
+#   bar/
+#     last-bar.html
+
+fnRename() {
+  for a in *$1*; do
+    mv $a ${a//$1/$2};
+  done;
 }
