@@ -37,7 +37,7 @@ fnGitReset() {
     uncommitted_changes=($(git status -s))
 
     if (( ${#uncommitted_changes[@]} == 0 )) then
-        echo "would have done: git reset --hard"
+        git reset --hard
     else
         git status -s
         
