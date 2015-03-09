@@ -6,7 +6,7 @@ then
  alias git=$hub_path
 fi
 
-alias ga='git add -A .'
+alias ga=fnGitAdd
 alias gb=fnGitBranch
 alias gd=fnGitDelete
 alias gdf=fnGitDeleteFeature
@@ -17,7 +17,7 @@ alias gc=fnGitCommit
 alias gch=fnGitCommitPush
 alias gi='git diff'
 alias gf='git fetch --all && gb'
-alias gr='git reset --hard'
+alias gr=fnGitReset
 alias gm=fnGitMerge
 alias gn=fnGitPrune
 alias gg=fnGitLog
@@ -27,6 +27,38 @@ alias gh='git push'
 alias gs='git status -sb'
 alias gt='git stash'
 alias gta='git stash apply'
+
+fnGitAdd() {
+    git add -A .
+}
+
+# Does a hard reset with double confirmation if there are uncommitted changes.
+fnGitReset() {
+    uncommitted_changes=($(git status -s))
+
+    if (( ${#uncommitted_changes[@]} == 0 )) then
+        echo "would have done: git reset --hard"
+    else
+        git status -s
+        
+        echo ""
+        read -q "CONFIRM?PERMANENTLY loose uncommitted changes above? (y/N) "
+
+        if [[ $CONFIRM == "y" ]] then
+            echo ""
+            read -q "CONFIRM_AGAIN?Really, really, sure? (y/N) "
+            echo ""
+      
+            if [[ $CONFIRM_AGAIN == "y" ]] then
+                git reset --hard
+            fi
+        fi
+    fi
+    
+    unset uncommitted_changes
+    unset CONFIRM
+    unset CONFIRM_AGAIN
+}
 
 fnGitPrune() {
     # save current branch
@@ -67,7 +99,7 @@ fnGitPrune() {
 
     git checkout $original_branch
 
-    gb
+    fnGitBranch
     
     unset branches_to_delete
     unset original_branch
@@ -128,12 +160,12 @@ fnGitCheckout() {
 }
 
 fnGitCheckoutPull() {
-    fnGitCheckout
+    fnGitCheckout $1
     git pull
 }
 
 fnGitCommit() {
-    git add --all
+    fnGitAdd
     git commit -m "$1"
 }
 
