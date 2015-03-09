@@ -26,7 +26,7 @@ fnSrcProject() {
   src_counter=1
   src_projects=()
 
-  for project in ~/src/$1*; do
+  for project in ~/src/*$1*; do
     # get folder name
     src_basename=$(basename $project)
 
@@ -54,7 +54,7 @@ fnSrcProject() {
   if [[ $src_project_name != "" ]] then
     cd ~/src/$src_project_name/
   else
-    echo "Invalid choice."
+    fnSrcProject $1
   fi
   
   unset src_counter
