@@ -39,6 +39,8 @@ fnGitReset() {
     if (( ${#uncommitted_changes[@]} == 0 )) then
         git reset --hard
     else
+        echo ""
+        echo "Uncommited chagnes:"
         git status -s
         
         echo ""
@@ -46,7 +48,7 @@ fnGitReset() {
 
         if [[ $CONFIRM == "y" ]] then
             echo ""
-            read -q "CONFIRM_AGAIN?Really, really, sure? (y/N) "
+            read -q "CONFIRM_AGAIN?You're aware there exists no black magic that can bring these back? (y/N) "
             echo ""
       
             if [[ $CONFIRM_AGAIN == "y" ]] then
