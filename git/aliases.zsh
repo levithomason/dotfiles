@@ -8,6 +8,7 @@ fi
 
 alias ga=fnGitAdd
 alias gb=fnGitBranch
+alias gba='git branch -a'
 alias gd=fnGitDelete
 alias gdf=fnGitDeleteFeature
 alias gbm=fnGitBranchMaster
@@ -115,7 +116,7 @@ fnGitPrune() {
 
 fnGitBranch() {
   if (( $# == 0 )) then
-    git branch -a
+    git branch
   else
     git pull
     git branch feature/$1
