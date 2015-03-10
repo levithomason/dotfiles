@@ -63,6 +63,11 @@ fnGitReset() {
 }
 
 fnGitPrune() {
+  # make sure we're in a git repo
+  if [[ $(fnIsGitRepo) != "true" ]] then
+    return false
+  fi
+
   # save current branch
   original_branch=$(git branch | grep "* ");
   original_branch=${original_branch/"* "};
@@ -78,31 +83,32 @@ fnGitPrune() {
   # array from lines
   branches_to_delete=("${(f)branches_to_delete}")
 
-  echo "\nLocal branches already merged:"
-  # list branches
-  for branch in $branches_to_delete; do
-    echo "$branch"
-  done
+  # if there are branches to delete (1 blank line always exists), confirm and delete
+  if (( ${#branches_to_delete[@]} > 1 )) then
+    echo "\nLocal branches already merged:"
+    # list branches
+    for branch in $branches_to_delete; do
+      echo "$branch"
+    done
+    
+    echo ""
+    read -q "CONFIRM?Delete ALL these? (y/N) "
+    echo ""
   
-  echo ""
-  read -q "CONFIRM?Delete ALL these? (y/N) "
-  echo ""
-
-  if [[ $CONFIRM == "y" ]]
-    then
-      # delete branches
-      for branch in $branches_to_delete; do
-        git branch -d ${branch// /}
-      done
-      
-    else
-      echo "\nCancelled"
+    if [[ $CONFIRM == "y" ]]
+      then
+        # delete branches
+        for branch in $branches_to_delete; do
+          git branch -d ${branch// /}
+        done
+        
+      else
+        echo "\nCancelled"
+    fi
   fi
 
   git checkout $original_branch
 
-  fnGitBranch
-  
   unset branches_to_delete
   unset original_branch
 }
