@@ -149,55 +149,86 @@ fnGitBranchMaster() {
 }
 
 fnGitCheckout() {
+  # make sure we're in a git repo
+  if [[ $(fnIsGitRepo) != "true" ]] then
+    return false
+  fi
+
+  # get query from arg 1 or wild card
   if (( $# > 0 )) then
-    git checkout $*
+    go_query=$1
   else
-    go_counter=1
-    go_branches=()
+    go_query="."
+  fi
   
-    # get branches, excluding current and master
-    go_branches=$(git branch | grep -v "\*" | egrep -v "master")
+  # use args 2+ as branch options array (for recursive narrowing)
+  if (( $# > 1 )) then
+    set -A go_branches ${@:2}
+  else
+    # get branches, excluding current
+    go_branches=$(git branch | grep -v "\*")
   
     # array from lines
     go_branches=("${(f)go_branches}")
-  
-    for go_branch in $go_branches; do
-      # replace spaces
-      go_branch=${go_branch//" "}
-      
-      # add branch to array
-      go_branches[$go_counter]=$go_branch
-      
-      # print array index and folder name
-      echo "$go_counter: $go_branch"
-  
-      # increment counter
-      go_counter=$((go_counter+1))
-    done;
-    
-    echo ""
-    read "go_choice?master/#: "
-    
-    # checkout master by default
-    if [[ $go_choice == "" ]] then
-      git checkout master
-    else
-      go_branch_name=$go_branches[$go_choice]
-    
-      # checkout branch if a valid array item was selected
-      if [[ $go_branch_name != "" ]] then
-        git checkout $go_branch_name
-      else
-        fnGitCheckout $1
-      fi
-    fi
   fi
 
-  unset go_counter
+  go_counter=1
+  go_matches=()
+  for go_branch in $go_branches; do
+    # replace spaces
+    go_branch=${go_branch//" "}
+    
+    # if branch contains query
+    if [[ $go_branch =~ $go_query ]] then;
+      # add to array
+      go_matches[$go_counter]=$go_branch
+    
+      # print index & name
+      echo "$go_counter: $go_branch"
+    
+      # increment counter
+      go_counter=$((go_counter+1))
+    fi
+  done;
+  
+  # 0 matches - rerun with no query, showing all options
+  if (( ${#go_matches[@]} == 0 )) then
+    fnGitCheckout
+    return false
+  fi
+
+  # 1 match, save it
+  if (( ${#go_matches[@]} == 1 )) then
+    go_checkout=$go_matches[1]
+  fi
+    
+  # >1 match, prompt for input
+  if (( ${#go_matches[@]} > 1 )) then
+    echo ""
+    read "go_input?(query/#): "
+    
+    # if input, attempt select branch from array by index
+    if [[ $go_input != "" ]] then
+      go_checkout=$go_matches[$go_input]
+    fi
+
+    # if input did not result in a valid branch index
+    # rerun with input as query against matches
+    if [[ $go_checkout == "" ]] then
+      fnGitCheckout $go_input $go_matches
+      return false
+    fi
+  fi
+  
+  git checkout ${go_checkout}
+
+  unset go_query
   unset go_branches
+  unset go_counter
   unset go_branch
-  unset go_choice
-  unset go_branch_name
+  unset go_matches
+  unset go_checkout
+  unset go_input
 }
 
 fnGitCheckoutPull() {
@@ -254,4 +285,12 @@ fnGitLogVerbose() {
   else
     git log --decorate --graph -n $1
   fi
+}
+
+##################################################
+# Helper functions
+##################################################
+
+fnIsGitRepo() {
+  git rev-parse --is-inside-work-tree
 }
