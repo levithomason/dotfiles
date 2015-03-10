@@ -68,12 +68,18 @@ fnGitPrune() {
   if [[ $(fnIsGitRepo) != "true" ]] then
     return false
   fi
+  
+  if [[ $1 != "" ]] then
+    prune_compare_branch=$1;
+  else
+    prune_compare_branch="master"
+  fi
 
   # save current branch
   original_branch=$(git branch | grep "* ");
   original_branch=${original_branch/"* "};
 
-  git checkout master
+  git checkout $prune_compare_branch
 
   # trim fetched to match remotes
   git pull --prune
@@ -110,6 +116,7 @@ fnGitPrune() {
 
   git checkout $original_branch
 
+  unset prune_compare_branch
   unset branches_to_delete
   unset original_branch
 }
