@@ -13,6 +13,7 @@ fi
 alias odot="open ~/.dotfiles"
 alias "cd.."="cd .."
 alias ".."="cd .."
+alias ws="wstorm"
 alias ren=fnRename
 alias src=fnSrcProject
 
