@@ -243,18 +243,18 @@ fnGitCheckoutPull() {
 }
 
 fnGitCommit() {
-  fnGitAdd
-  git commit -m "$1"
-}
-
-fnGitCommitPush() {
   if (( $# == 0 )) then
     echo "commit what sucka?!"
   else
-    fnGitCommit $1
-    git pull
-    git push
+    fnGitAdd
+    git commit -m "$1"
   fi
+}
+
+fnGitCommitPush() {
+  fnGitCommit $1
+  git pull
+  git push
 }
 
 fnGitMerge() {
