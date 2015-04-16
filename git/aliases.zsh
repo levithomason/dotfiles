@@ -30,7 +30,7 @@ alias gt='git stash'
 alias gta='git stash apply'
 
 fnGitAdd() {
-  git add -A .
+  git add . --all
 }
 
 # Does a hard reset with double confirmation if there are uncommitted changes.
@@ -70,16 +70,12 @@ fnGitPrune() {
   fi
   
   if [[ $1 != "" ]] then
-    prune_compare_branch=$1;
-  else
-    prune_compare_branch="master"
+    # save current branch
+    original_branch=$(git branch | grep "* ");
+    original_branch=${original_branch/"* "};
+  
+    git checkout $1;
   fi
-
-  # save current branch
-  original_branch=$(git branch | grep "* ");
-  original_branch=${original_branch/"* "};
-
-  git checkout $prune_compare_branch
 
   # trim fetched to match remotes
   git pull --prune
@@ -90,33 +86,29 @@ fnGitPrune() {
   # array from lines
   branches_to_delete=("${(f)branches_to_delete}")
 
-  # if there are branches to delete (1 blank line always exists), confirm and delete
-  if (( ${#branches_to_delete[@]} > 1 )) then
-    echo "\nLocal branches already merged:"
-    # list branches
-    for branch in $branches_to_delete; do
-      echo "$branch"
-    done
-    
-    echo ""
-    read -q "CONFIRM?Delete ALL these? (y/N) "
-    echo ""
+  echo "\nBranches already merged into current branch:"
+  # list branches
+  for branch in $branches_to_delete; do
+    echo "$branch"
+  done
   
-    if [[ $CONFIRM == "y" ]]
-      then
-        # delete branches
-        for branch in $branches_to_delete; do
-          git branch -d ${branch// /}
-        done
-        
-      else
-        echo "\nCancelled"
-    fi
+  echo ""
+  read -q "CONFIRM?Delete ALL these? (y/N) "
+  echo ""
+
+  if [[ $CONFIRM == "y" ]]
+    then
+      # delete branches
+      for branch in $branches_to_delete; do
+        git branch -d ${branch// /}
+      done
+      
+    else
+      echo "\nCancelled"
   fi
 
   git checkout $original_branch
 
-  unset prune_compare_branch
   unset branches_to_delete
   unset original_branch
 }
@@ -251,18 +243,18 @@ fnGitCheckoutPull() {
 }
 
 fnGitCommit() {
-  fnGitAdd
-  git commit -m "$1"
-}
-
-fnGitCommitPush() {
   if (( $# == 0 )) then
     echo "commit what sucka?!"
   else
-    fnGitCommit $1
-    git pull
-    git push
+    fnGitAdd
+    git commit -m "$1"
   fi
+}
+
+fnGitCommitPush() {
+  fnGitCommit $1
+  git pull
+  git push
 }
 
 fnGitMerge() {
