@@ -123,7 +123,7 @@ fnGitPrune() {
 
 fnGitBranch() {
   if (( $# == 0 )) then
-    git branch
+    git branch --all
   else
     git pull
     git branch feature/$1
