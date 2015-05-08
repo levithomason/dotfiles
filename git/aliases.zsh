@@ -30,7 +30,7 @@ alias gt='git stash'
 alias gta='git stash apply'
 
 fnGitAdd() {
-  git add . --all
+  git add -A .
 }
 
 # Does a hard reset with double confirmation if there are uncommitted changes.
