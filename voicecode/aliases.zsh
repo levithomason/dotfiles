@@ -1,1 +1,1 @@
-alias voicecode=~/voicecode/run.sh
+alias voicecode="cd ~/voicecode && ./run.sh"
