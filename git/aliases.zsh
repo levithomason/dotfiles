@@ -167,22 +167,49 @@ fnGitCheckout() {
     go_query="."
   fi
   
-  # use args 2+ as branch options array (for recursive narrowing)
+  # create branch array, only allow unique items
+  # we'll add branches from HEAD and remotes, meaning possible dupes
+  go_branches=()
+  typeset -U go_branches
+
+  # this fn is recursive
+  # the first arg is always the query
+  # the following are a list of branches matching the previous query
+  # use args >2 as array of branch options (for recursive narrowing)
   if (( $# > 1 )) then
     set -A go_branches ${@:2}
   else
-    # get branches, excluding current
-    go_branches=$(git branch | grep -v "\*")
-  
-    # array from lines
-    go_branches=("${(f)go_branches}")
+    # add branches in HEAD and on remotes
+    for branch in $(git for-each-ref --shell --format='%(refname)' refs/{heads,remotes}); do
+      # turn list of branches into something we can "git checkout"
+      #
+      # INPUT                           OUTPUT
+      # 'refs/heads/master'             master
+      # 'refs/remotes/origin/gh-pages'  origin gh-pages
+      # 'refs/remotes/foo/feature/foo'  foo feature/bar
+
+                                        # replace:
+      branch=${branch//\'}              #   single quotes
+      branch=${branch/refs\/heads\/}    #   "refs/heads/"
+      branch=${branch/refs\/remotes\/}  #   "refs/remotes/"
+      branch=${branch/\// }             #   "/" (after remote name) with a " "
+      branch=${branch/* }               #   remote name (* up to the last " ")
+      
+      # add scrubbed branch name to array
+      go_branches+=($branch)
+    done;
+  fi
+
+  # running recursively with no matching branches results in an endless loop
+  # if there are no 'other' branches to switch to, notify and exit
+  if (( ${#go_branches[@]} == 0 )) then
+    echo "No other branches in HEAD or on remotes"
+    return false
   fi
 
   go_counter=1
   go_matches=()
   for go_branch in $go_branches; do
-    # replace spaces
-    go_branch=${go_branch//" "}
     
     # if branch contains query
     if [[ $go_branch =~ $go_query ]] then;
@@ -207,7 +234,7 @@ fnGitCheckout() {
   if (( ${#go_matches[@]} == 1 )) then
     go_checkout=$go_matches[1]
   fi
-    
+
   # >1 match, prompt for input
   if (( ${#go_matches[@]} > 1 )) then
     echo ""
@@ -225,7 +252,7 @@ fnGitCheckout() {
       return false
     fi
   fi
-  
+
   git checkout ${go_checkout}
 
   unset go_query
