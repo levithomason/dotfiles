@@ -181,6 +181,7 @@ fnGitCheckout() {
   else
     # add branches in HEAD and on remotes
     for branch in $(git for-each-ref --shell --format='%(refname)' refs/{heads,remotes}); do
+
       # turn list of branches into something we can "git checkout"
       #
       # INPUT                           OUTPUT
@@ -188,18 +189,17 @@ fnGitCheckout() {
       # 'refs/remotes/origin/gh-pages'  origin gh-pages
       # 'refs/remotes/foo/feature/foo'  foo feature/bar
 
-                                        # replace:
-      branch=${branch//\'}              #   single quotes
-      branch=${branch/refs\/heads\/}    #   "refs/heads/"
-      branch=${branch/refs\/remotes\/}  #   "refs/remotes/"
-      branch=${branch/\// }             #   "/" (after remote name) with a " "
-      branch=${branch/* }               #   remote name (* up to the last " ")
+                                              # replace:
+      branch=${branch//\'}                    #   single quotes
+      branch=${branch/refs\/heads\/}          #   "refs/heads/"
+      branch=${(S)branch/refs\/remotes\/*\/}  #   "refs/remotes/*/" (S) flag == shortest match
       
       # add scrubbed branch name to array
       go_branches+=($branch)
+      
     done;
   fi
-
+  
   # running recursively with no matching branches results in an endless loop
   # if there are no 'other' branches to switch to, notify and exit
   if (( ${#go_branches[@]} == 0 )) then
