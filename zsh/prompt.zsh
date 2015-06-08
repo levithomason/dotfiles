@@ -99,7 +99,9 @@ venv_prompt() {
 # END VIRTUALENVWRAPPER SUPPORT
 #
 
-export PROMPT=$'\n$(venv_prompt)$(rb_prompt)in $(directory_name) $(git_dirty)$(need_push)\n› '
+# Old prompt, included venv and rb promt
+# export PROMPT=$'\n$(venv_prompt)$(rb_prompt)in $(directory_name) $(git_dirty)$(need_push)\n› '
+export PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n› '
 
 set_prompt () {
   export RPROMPT="%{$fg_bold[cyan]%}%{$reset_color%}"
